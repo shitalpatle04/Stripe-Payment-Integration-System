@@ -1,29 +1,31 @@
 # Stripe Payment Integration System
 
-A microservices-based payment integration system developed using **Java** and **Spring Boot** that integrates with the **Stripe Payment Gateway** for secure online payments.
+A microservices-based payment integration system built using **Java** and **Spring Boot** that integrates with the **Stripe Payment Gateway** for secure online payments.
 
-The project demonstrates secure payment processing, request validation, HMAC authentication, business rule validation, and a modular microservices architecture.
+The project demonstrates secure payment processing through a modular microservices architecture, incorporating request validation, HMAC authentication, externalized configuration, and business rule validation.
 
 ---
 
 ## Project Overview
 
-The Stripe Payment Integration System is a backend application built using Java and Spring Boot that simulates a real-world payment workflow. It validates incoming payment requests, applies business validation rules, and securely integrates with the Stripe Payment Gateway to create hosted checkout sessions.
+The Stripe Payment Integration System simulates a real-world payment workflow used by merchant applications. Incoming payment requests are validated through a dedicated validation service before being forwarded to Stripe for payment session creation.
 
-The application follows a microservices architecture, where each service is responsible for a specific functionality, making the system modular, maintainable, and scalable.
+The application follows a **Microservices Architecture**, where each service has a single responsibility, making the system scalable, maintainable, and easier to extend.
 
 ---
 
 ## Key Highlights
 
-- Microservices-based architecture
-- Stripe Checkout Session integration
-- HMAC SHA-256 request authentication
-- Duplicate transaction validation
-- Payment threshold validation
-- Spring Security integration
-- RESTful API development
-- Flyway database migration
+- Microservices Architecture
+- Stripe Checkout Session Integration
+- HMAC SHA-256 Request Authentication
+- Business Rule Validation
+- Duplicate Transaction Detection
+- Payment Threshold Validation
+- Spring Security Integration
+- Externalized Configuration using Spring Cloud Config
+- Flyway Database Migration
+- Layered Architecture
 
 ---
 
@@ -45,7 +47,7 @@ The application follows a microservices architecture, where each service is resp
 8. The Create Session Integration Service communicates with Stripe APIs.
 9. Stripe generates a Checkout Session.
 10. The customer is redirected to the Stripe Hosted Checkout page.
-11. After payment completion, Stripe returns the payment status to the Merchant Application.
+11. Stripe returns the payment status to the Merchant Application through a callback/webhook.
 
 ---
 
@@ -60,6 +62,10 @@ Stripe-Payment-Integration-System
 ├── create-session-integration
 │
 ├── validation-service-validator
+│
+├── payment-config-server-integration
+│
+├── payment-config-properties
 │
 └── README.md
 ```
@@ -87,9 +93,9 @@ Responsible for:
 
 ---
 
-### 2. Validation Service Validator
+### 2. Validation Service
 
-Responsible for validating payment requests before forwarding them to the Stripe service.
+Responsible for validating incoming payment requests before forwarding them to the Stripe service.
 
 **Features**
 
@@ -103,10 +109,39 @@ Responsible for validating payment requests before forwarding them to the Stripe
 
 ---
 
+### 3. Spring Cloud Config Server
+
+Responsible for centralized configuration management across all microservices.
+
+**Features**
+
+- Centralized Configuration
+- Environment-specific Properties
+- Spring Cloud Config Server
+- External Configuration Management
+
+---
+
+### 4. Configuration Repository
+
+Stores centralized configuration files consumed by the Config Server.
+
+Contains environment-specific property files such as:
+
+- Local
+- Development
+- QA
+- UAT
+- Production
+
+---
+
 ## Features
 
 - Microservices Architecture
 - Stripe Payment Gateway Integration
+- Spring Cloud Config Server
+- Externalized Configuration
 - Secure REST APIs
 - Spring Security
 - HMAC Authentication
@@ -121,12 +156,13 @@ Responsible for validating payment requests before forwarding them to the Stripe
 
 ## Technology Stack
 
-| Technology | Description |
-|------------|-------------|
+| Technology | Purpose |
+|------------|---------|
 | Java 21 | Programming Language |
 | Spring Boot | Backend Framework |
 | Spring Web | REST API Development |
-| Spring Security | Authentication & Authorization |
+| Spring Security | Security |
+| Spring Cloud Config | Centralized Configuration |
 | Maven | Build Tool |
 | MySQL | Relational Database |
 | Flyway | Database Migration |
@@ -157,10 +193,13 @@ Duplicate Transaction Validation
 Payment Threshold Validation
         │
         ▼
-Create Session Integration Service
+Create Session Integration
         │
         ▼
 Stripe Checkout Session
+        │
+        ▼
+Hosted Payment Page
 ```
 
 ---
@@ -178,17 +217,18 @@ The project implements multiple security mechanisms including:
 
 ## Database
 
-The Validation Service stores:
+The Validation Service maintains:
 
 - Merchant Payment Requests
 - Validation Rules
+- Validation Rule Parameters
 - Duplicate Transaction Records
 
 Database schema migrations are managed using **Flyway**.
 
 ---
 
-## REST APIs
+## REST API
 
 ### Create Stripe Checkout Session
 
@@ -222,7 +262,7 @@ POST /payment/create-session
 
 ## Prerequisites
 
-Before running the project, ensure the following software is installed:
+Before running the project, install:
 
 - Java 21
 - Maven 3.9+
@@ -240,27 +280,26 @@ Before running the project, ensure the following software is installed:
 git clone https://github.com/shitalpatle04/Stripe-Payment-Integration-System.git
 ```
 
-### Navigate to a Microservice
-
-```bash
-cd create-session-integration
-```
-
-or
-
-```bash
-cd validation-service-validator
-```
-
-### Build the Project
+### Build
 
 ```bash
 mvn clean install
 ```
 
-### Run the Application
+### Run Individual Microservices
 
 ```bash
+cd payment-config-server-integration
+mvn spring-boot:run
+```
+
+```bash
+cd validation-service-validator
+mvn spring-boot:run
+```
+
+```bash
+cd create-session-integration
 mvn spring-boot:run
 ```
 
@@ -268,9 +307,13 @@ mvn spring-boot:run
 
 ## Configuration
 
-Before running the application, configure the following properties:
+The project uses **Spring Cloud Config Server** for centralized configuration.
 
-- MySQL Database URL
+Configuration files are maintained inside the **payment-config-properties** module.
+
+Configure the following values before running:
+
+- Database URL
 - Database Username
 - Database Password
 - Stripe Secret Key
@@ -287,32 +330,32 @@ hmac.secret.key=${HMAC_SECRET_KEY}
 
 ## Learning Outcomes
 
-This project helped me gain practical experience in:
+Through this project, I gained hands-on experience with:
 
 - Java Backend Development
 - Spring Boot
-- REST API Development
 - Microservices Architecture
+- REST API Development
 - Stripe Payment Gateway Integration
 - Spring Security
 - HMAC Authentication
-- Business Rule Validation
+- Spring Cloud Config
 - Flyway Database Migration
-- Git and GitHub
+- Git & GitHub
 
 ---
 
 ## Future Enhancements
 
-- Spring Cloud Config Server
 - API Gateway
-- Service Discovery
-- Docker Containerization
+- Service Discovery (Eureka)
+- Docker & Docker Compose
 - Kubernetes Deployment
 - Redis Caching
-- Kafka Integration
+- Kafka Event Streaming
 - CI/CD Pipeline
-- Monitoring and Logging
+- Distributed Tracing
+- Monitoring using Prometheus & Grafana
 
 ---
 
@@ -320,8 +363,20 @@ This project helped me gain practical experience in:
 
 **Shital Patle**
 
-Backend Developer | Java | Spring Boot | REST APIs | Microservices
+Java Backend Developer
 
-GitHub: https://github.com/shitalpatle04
+**Skills**
 
----
+- Java
+- Spring Boot
+- Spring Security
+- Spring Cloud
+- Microservices
+- REST APIs
+- MySQL
+- Maven
+- Git & GitHub
+
+**GitHub**
+
+https://github.com/shitalpatle04
